@@ -108,18 +108,30 @@
 
     <ng-container *ngIf="viewMode === 'dashboard'">
       <section class="controls">
-        <div class="member-autocomplete">
+        <div class="filter-fields">
+          <div class="member-autocomplete">
+            <input
+              type="search"
+              name="search"
+              placeholder="Search player"
+              [(ngModel)]="searchTerm"
+              (focus)="openMemberAutocomplete()"
+              (input)="openMemberAutocomplete()"
+              (blur)="closeMemberAutocomplete()"
+              autocomplete="off"
+              aria-label="Search player">
+          </div>
           <input
             type="search"
-            name="search"
-            placeholder="Search member"
-            [(ngModel)]="searchTerm"
+            name="noteSearch"
+            placeholder="Search note"
+            [(ngModel)]="noteSearchTerm"
             (focus)="openMemberAutocomplete()"
             (input)="openMemberAutocomplete()"
             (blur)="closeMemberAutocomplete()"
             autocomplete="off"
-            aria-label="Search member">
-          <div class="member-options" *ngIf="isMemberAutocompleteOpen && searchTerm.trim()">
+            aria-label="Search note">
+          <div class="member-options" *ngIf="isMemberAutocompleteOpen && (searchTerm.trim() || noteSearchTerm.trim())">
             <button
             type="button"
             class="member-option"

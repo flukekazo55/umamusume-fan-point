@@ -16,6 +16,7 @@ export class DashboardComponent implements OnInit {
   isMonthAutocompleteOpen = false;
   selectedMember?: Member;
   searchTerm = '';
+  noteSearchTerm = '';
   isMemberAutocompleteOpen = false;
   sortMode: SortMode = 'rank';
   isLoading = true;
@@ -89,6 +90,7 @@ export class DashboardComponent implements OnInit {
     this.isMonthAutocompleteOpen = false;
     this.selectedMember = month.members[0];
     this.searchTerm = '';
+    this.noteSearchTerm = '';
   }
 
   openMonthAutocomplete(): void {
@@ -303,12 +305,13 @@ export class DashboardComponent implements OnInit {
 
   filteredMembers(): Member[] {
     const members = [...(this.selectedMonth?.members ?? [])];
-    const query = this.searchTerm.trim().toLowerCase();
-    const filtered = query
-      ? members.filter((member) =>
-          `${member.name} ${member.note ?? ''}`.toLowerCase().includes(query)
-        )
-      : members;
+    const nameQuery = this.searchTerm.trim().toLowerCase();
+    const noteQuery = this.noteSearchTerm.trim().toLowerCase();
+    const filtered = members.filter((member) => {
+      const matchesName = !nameQuery || member.name.toLowerCase().includes(nameQuery);
+      const matchesNote = !noteQuery || (member.note ?? '').toLowerCase().includes(noteQuery);
+      return matchesName && matchesNote;
+    });
 
     switch (this.sortMode) {
       case 'gain':

@@ -276,9 +276,15 @@ h4 {
   backdrop-filter: blur(16px);
 }
 
+.filter-fields,
 .member-autocomplete {
   position: relative;
   min-width: 0;
+}
+
+.filter-fields {
+  display: grid;
+  gap: 8px;
 }
 
 .controls input {
@@ -709,10 +715,14 @@ h4 {
   }
 
   .controls {
-    grid-template-columns: minmax(260px, 1fr) 340px 42px;
+    grid-template-columns: minmax(420px, 1fr) 340px 42px;
     align-items: center;
     margin-inline: 0;
     padding-inline: 0;
+  }
+
+  .filter-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .content-grid {
