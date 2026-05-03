@@ -1,26 +1,26 @@
 FROM golang:1.25-alpine AS builder
 
-WORKDIR /build
+WORKDIR /build/backend
 
-COPY go.mod go.sum ./
+COPY backend/go.mod backend/go.sum ./
 RUN go mod download
 
-COPY . .
+COPY backend/ ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /build/server ./cmd/server
 
 FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+WORKDIR /app
 
-# Copy the compiled binary
-COPY --from=builder /build/server .
+COPY --from=builder /build/server ./server
 
-# Copy the Excel data file
-COPY source.xlsx .
+COPY source.xlsx ./source.xlsx
 
 EXPOSE 8080
+ENV ADDR=:8080
+ENV DATA_FILE=/app/source.xlsx
 
 CMD ["./server"]

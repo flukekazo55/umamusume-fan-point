@@ -4,6 +4,10 @@ This application consists of a frontend (Angular) and backend (Go). They need to
 
 ## Frontend Deployment on Vercel
 
+Vercel hosts the Angular frontend in this project. The Go backend still needs to
+be deployed separately on a platform that runs long-lived Go HTTP services, such
+as Railway, Render, Fly.io, or Cloud Run.
+
 ### Prerequisites
 - GitHub account with this repository connected
 - Vercel account
@@ -23,13 +27,17 @@ This application consists of a frontend (Angular) and backend (Go). They need to
 
 3. **Configure Build Settings**
    - **Build Command**: `cd frontend && npm install && npm run build`
-   - **Output Directory**: `frontend/dist/fan-point`
+   - **Output Directory**: `frontend/dist/fan-point/browser`
    - **Install Command**: `npm ci`
 
 4. **Set Environment Variables**
    - In Vercel Project Settings → Environment Variables
    - Add: `BACKEND_URL` = `https://your-backend-url.com`
    - This URL should be where your Go backend is deployed
+   - Do not include a trailing slash
+
+The frontend calls `/api/...`. Vercel routes those requests to `api/proxy.js`,
+and that proxy forwards them to `${BACKEND_URL}/api/...`.
 
 5. **Deploy**
    - Click "Deploy"
@@ -61,7 +69,8 @@ Your Go backend needs a separate platform that supports Go HTTP servers. Choose 
    - **Start Command**: `./server`
    - **Root Directory**: `backend`
 5. Set environment variables same as Railway
-6. Deploy
+6. If the database is empty and you want the backend to seed from Excel, make sure `source.xlsx` is available to the backend and set `DATA_FILE` to that deployed file path. Otherwise, pre-import the Mongo data before first start.
+7. Deploy
 
 ### Option 3: Fly.io
 
@@ -107,12 +116,14 @@ After both are deployed:
 1. Visit your Vercel frontend URL
 2. Open browser DevTools → Network tab
 3. Make an API call (click a button that fetches data)
-4. Verify API calls go to your backend URL
+4. Verify API calls go to `/api/...` on your Vercel domain and return backend data
 5. Test CRUD operations (if using MongoDB)
 
 ## CORS Configuration
 
-The Go backend needs to allow requests from your Vercel domain. Update `handler.go` if needed to add CORS headers:
+The deployed frontend normally calls the same Vercel origin, and `api/proxy.js`
+forwards the request to the Go backend. The backend already sends permissive CORS
+headers, which is useful if you also call the backend URL directly:
 
 ```go
 mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {

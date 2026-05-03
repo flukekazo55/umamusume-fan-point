@@ -52,11 +52,13 @@
 3. [ ] **Configure Build Settings in Vercel**
    - **Framework**: Other (not Next.js)
    - **Build Command**: `cd frontend && npm install && npm run build`
-   - **Output Directory**: `frontend/dist/fan-point`
+   - **Output Directory**: `frontend/dist/fan-point/browser`
    - **Install Command**: `npm ci`
 
 4. [ ] **Add Environment Variables**
    - [ ] `BACKEND_URL` = `https://your-backend-deployment-url.com`
+   - [ ] Backend URL has no trailing slash
+   - [ ] Vercel project uses the repo root, or if it uses `frontend` as root, `frontend/api/proxy.js` is included
 
 5. [ ] **Deploy**
    - [ ] Click Deploy button

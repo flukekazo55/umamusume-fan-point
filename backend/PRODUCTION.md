@@ -27,8 +27,7 @@ Railway auto-detects Go projects and handles deployment automatically.
 Build and run locally to test:
 
 ```bash
-cd backend
-docker build -t fan-point-backend .
+docker build -f backend/Dockerfile -t fan-point-backend .
 docker run -p 8080:8080 -e MONGO_URI=your_mongo_url fan-point-backend
 ```
 
@@ -51,7 +50,9 @@ Then deploy to:
 ## Troubleshooting
 
 ### "source.xlsx not found"
-Ensure the file is in the working directory or set `DATA_FILE` env var.
+Ensure the file is deployed with the backend or set `DATA_FILE` to the deployed
+file path. If MongoDB is already populated, the backend can run from Mongo data,
+but an empty database needs either `source.xlsx` for seeding or a manual import.
 
 ### MongoDB connection fails
 - Verify connection string in `MONGO_URI`
