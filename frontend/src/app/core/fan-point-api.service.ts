@@ -12,6 +12,12 @@ export class FanPointApiService {
     return this.http.get<Workbook>('/api/months');
   }
 
+  exportMonth(monthId: string): Observable<Blob> {
+    return this.http.get(`/api/months/${encodeURIComponent(monthId)}/export`, {
+      responseType: 'blob'
+    });
+  }
+
   createMonth(input: MonthInput): Observable<Month> {
     return this.http.post<Month>('/api/months', input);
   }

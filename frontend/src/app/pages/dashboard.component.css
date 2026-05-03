@@ -112,7 +112,7 @@ h4 {
 
 .month-autocomplete input {
   width: 100%;
-  min-height: 48px;
+  height: 42px;
   border: 1px solid rgba(217, 222, 232, 0.95);
   border-radius: 8px;
   background:
@@ -704,7 +704,7 @@ h4 {
   }
 
   .month-row {
-    grid-template-columns: minmax(260px, 1fr) 42px 42px 42px;
+    grid-template-columns: minmax(260px, 1fr) repeat(4, 42px);
     align-items: end;
   }
 

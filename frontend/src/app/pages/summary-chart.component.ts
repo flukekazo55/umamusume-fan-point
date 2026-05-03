@@ -1,66 +1,89 @@
-import { Component, Input, OnChanges, SimpleChanges, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import Chart from 'chart.js/auto';
-import { Month } from '../models/fan-point.models';
+import { Member, Month } from '../models/fan-point.models';
+
+type ChartMetric = 'gain' | 'current' | 'average';
+
+interface ChartMetricConfig {
+  label: string;
+  color: string;
+  borderColor: string;
+  getValue: (member: Member) => number;
+}
+
+const CHART_METRICS: Record<ChartMetric, ChartMetricConfig> = {
+  gain: {
+    label: 'Total Gain',
+    color: '#10b981',
+    borderColor: '#0d946d',
+    getValue: (member) => member.totalGain
+  },
+  current: {
+    label: 'Current Fans',
+    color: '#8b5cf6',
+    borderColor: '#7443d3',
+    getValue: (member) => member.currentFans
+  },
+  average: {
+    label: 'Avg Gain Per Week',
+    color: '#ec4899',
+    borderColor: '#c93579',
+    getValue: (member) => member.averageGain
+  }
+};
 
 @Component({
   selector: 'app-summary-chart',
   templateUrl: './summary-chart.component.html',
   styleUrl: './summary-chart.component.css'
 })
-export class SummaryChartComponent implements OnChanges, AfterViewInit {
+export class SummaryChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input() selectedMonth?: Month;
   @ViewChild('chartCanvas') canvasRef?: ElementRef<HTMLCanvasElement>;
 
-  chart?: Chart;
-  chartType: 'gain' | 'current' | 'average' = 'gain';
+  chartType: ChartMetric = 'gain';
+
+  private chart?: Chart;
 
   ngAfterViewInit(): void {
-    this.initChart();
+    this.renderChart();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['selectedMonth'] && !changes['selectedMonth'].firstChange) {
-      this.updateChart();
+    if (changes['selectedMonth']) {
+      this.renderChart();
     }
   }
 
-  initChart(): void {
-    if (!this.canvasRef || !this.selectedMonth) {
-      return;
-    }
-    this.createChart();
+  ngOnDestroy(): void {
+    this.destroyChart();
   }
 
-  updateChart(): void {
-    if (this.chart) {
-      this.chart.destroy();
-    }
-    this.createChart();
-  }
-
-  changeChartType(type: 'gain' | 'current' | 'average'): void {
+  changeChartType(type: ChartMetric): void {
     this.chartType = type;
-    this.updateChart();
+    this.renderChart();
   }
 
-  private createChart(): void {
+  private renderChart(): void {
     if (!this.canvasRef || !this.selectedMonth) {
       return;
     }
 
-    const canvas = this.canvasRef.nativeElement;
-    const { labels, data, color } = this.getChartData();
+    this.destroyChart();
 
-    this.chart = new Chart(canvas, {
+    const metric = CHART_METRICS[this.chartType];
+    const chartData = this.buildChartData(metric);
+
+    this.chart = new Chart(this.canvasRef.nativeElement, {
       type: 'bar',
       data: {
-        labels,
+        labels: chartData.labels,
         datasets: [
           {
-            label: this.getChartLabel(),
-            data,
-            backgroundColor: color,
-            borderColor: this.adjustBrightness(color, -20),
+            label: metric.label,
+            data: chartData.data,
+            backgroundColor: metric.color,
+            borderColor: metric.borderColor,
             borderWidth: 1,
             borderRadius: 4
           }
@@ -98,57 +121,22 @@ export class SummaryChartComponent implements OnChanges, AfterViewInit {
     });
   }
 
-  private getChartData(): { labels: string[]; data: number[]; color: string } {
-    const members = (this.selectedMonth?.members || []).sort(
-      (a, b) => b.currentFans - a.currentFans
-    );
-
-    let data: number[] = [];
-    let color = '#3b82f6';
-
-    switch (this.chartType) {
-      case 'current':
-        data = members.map((m) => m.currentFans);
-        color = '#8b5cf6';
-        break;
-      case 'average':
-        data = members.map((m) => m.averageGain);
-        color = '#ec4899';
-        break;
-      case 'gain':
-      default:
-        data = members.map((m) => m.totalGain);
-        color = '#10b981';
-        break;
-    }
-
+  private buildChartData(metric: ChartMetricConfig): { labels: string[]; data: number[] } {
+    const members = this.getMembersByCurrentFans();
     return {
-      labels: members.map((m) => m.name),
-      data,
-      color
+      labels: members.map((member) => member.name),
+      data: members.map((member) => metric.getValue(member))
     };
   }
 
-  private getChartLabel(): string {
-    switch (this.chartType) {
-      case 'current':
-        return 'Current Fans';
-      case 'average':
-        return 'Avg Gain Per Week';
-      case 'gain':
-      default:
-        return 'Total Gain';
-    }
+  private getMembersByCurrentFans(): Member[] {
+    return [...(this.selectedMonth?.members ?? [])].sort(
+      (first, second) => second.currentFans - first.currentFans
+    );
   }
 
-  private adjustBrightness(color: string, percent: number): string {
-    const usePound = color[0] === '#';
-    const col = usePound ? color.slice(1) : color;
-    const num = parseInt(col, 16);
-    const amt = Math.round(2.55 * percent);
-    const R = Math.min(255, Math.max(0, (num >> 16) + amt));
-    const G = Math.min(255, Math.max(0, (num >> 8 & 0x00ff) + amt));
-    const B = Math.min(255, Math.max(0, (num & 0x0000ff) + amt));
-    return (usePound ? '#' : '') + (0x1000000 + (R < 256 ? R * 0x10000 : 0) + (G < 256 ? G * 0x100 : 0) + (B < 256 ? B : 0)).toString(16).slice(1);
+  private destroyChart(): void {
+    this.chart?.destroy();
+    this.chart = undefined;
   }
 }

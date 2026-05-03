@@ -43,6 +43,22 @@ export class DashboardComponent implements OnInit {
     this.viewMode = mode;
   }
 
+  exportSelectedMonth(): void {
+    if (!this.selectedMonth) {
+      return;
+    }
+
+    const month = this.selectedMonth;
+    this.api.exportMonth(month.id).subscribe({
+      next: (file) => {
+        this.downloadBlob(file, `${this.safeFileName(month.id)}-summary.xlsx`);
+      },
+      error: (error: unknown) => {
+        void this.alerts.error('Export failed', this.errorText(error));
+      }
+    });
+  }
+
   loadWorkbook(preferredMonthId?: string, preferredMemberName?: string): void {
     if (!this.workbook) {
       this.isLoading = true;
@@ -323,6 +339,20 @@ export class DashboardComponent implements OnInit {
   private latestMonth(workbook: Workbook): Month | undefined {
     return workbook.months.find((month) => month.id === workbook.latestId)
       ?? [...workbook.months].sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime())[0];
+  }
+
+  private downloadBlob(blob: Blob, fileName: string): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private safeFileName(value: string): string {
+    return value.replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'month';
   }
 
   private errorText(error: unknown): string {

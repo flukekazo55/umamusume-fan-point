@@ -36,11 +36,21 @@ export class CrudAlertService {
       html: this.monthFormHtml(isCreate, value, months),
       width: 720,
       showCancelButton: true,
+      showCloseButton: true,
       confirmButtonText: isCreate ? 'Create Month' : 'Save Month',
       cancelButtonText: 'Cancel',
       confirmButtonColor: '#e11d48',
       focusConfirm: false,
-      customClass: { popup: 'crud-swal' },
+      buttonsStyling: false,
+      customClass: {
+        popup: 'crud-swal month-swal',
+        title: 'crud-swal-title',
+        htmlContainer: 'crud-swal-content',
+        actions: 'crud-swal-actions',
+        confirmButton: 'crud-confirm-button',
+        cancelButton: 'crud-cancel-button',
+        closeButton: 'crud-close-button'
+      },
       didOpen: () => this.bindMonthDatePickers(),
       preConfirm: () => {
         const formValue = this.readMonthForm(isCreate, value.id);
@@ -69,11 +79,21 @@ export class CrudAlertService {
       html: this.playerFormHtml(dates, member),
       width: 760,
       showCancelButton: true,
+      showCloseButton: true,
       confirmButtonText: isCreate ? 'Create Player' : 'Save Player',
       cancelButtonText: 'Cancel',
       confirmButtonColor: '#e11d48',
       focusConfirm: false,
-      customClass: { popup: 'crud-swal' },
+      buttonsStyling: false,
+      customClass: {
+        popup: 'crud-swal player-swal',
+        title: 'crud-swal-title',
+        htmlContainer: 'crud-swal-content',
+        actions: 'crud-swal-actions',
+        confirmButton: 'crud-confirm-button',
+        cancelButton: 'crud-cancel-button',
+        closeButton: 'crud-close-button'
+      },
       didOpen: () => this.bindNumberFormatting(),
       preConfirm: () => {
         const formValue = this.readPlayerForm(dates);
@@ -111,7 +131,7 @@ export class CrudAlertService {
     ].join('');
 
     return `
-      <div class="crud-form">
+      <div class="crud-form month-form">
         <div class="crud-grid month-grid">
           <label>
             <span>ID</span>
@@ -123,11 +143,15 @@ export class CrudAlertService {
           </label>
           <label>
             <span>Start</span>
-            <input id="month-start" data-flatpickr value="${this.escape(value.startDate)}">
+            <div class="date-input-shell">
+              <input id="month-start" data-flatpickr value="${this.escape(value.startDate)}">
+            </div>
           </label>
           <label>
             <span>End</span>
-            <input id="month-end" data-flatpickr value="${this.escape(value.endDate)}">
+            <div class="date-input-shell">
+              <input id="month-end" data-flatpickr value="${this.escape(value.endDate)}">
+            </div>
           </label>
         </div>
         ${isCreate ? `
@@ -138,9 +162,10 @@ export class CrudAlertService {
         ` : ''}
         <div class="crud-date-section">
           <div class="crud-section-header">
-            <span>Dates</span>
+            <strong>Dates</strong>
             <button type="button" class="crud-add-button" id="month-add-date" title="Add date" aria-label="Add date">
               ${this.icon('plus')}
+              <span>Add Date</span>
             </button>
           </div>
           <div class="crud-date-list" id="month-date-list">
@@ -159,6 +184,7 @@ export class CrudAlertService {
   private monthDateRowHtml(date: string): string {
     return `
       <div class="crud-date-row">
+        <span class="crud-date-handle" aria-hidden="true"></span>
         <input data-month-date data-flatpickr value="${this.escape(date)}">
         <button type="button" class="crud-remove-button" data-remove-date title="Remove date" aria-label="Remove date">
           ${this.icon('trash')}
@@ -172,16 +198,19 @@ export class CrudAlertService {
     const pointInputs = dates.map((date) => `
       <label>
         <span>${this.escape(this.shortDate(date))}</span>
-        <input
-          id="fans-${this.escape(date)}"
-          inputmode="numeric"
-          data-number-input
-          value="${this.escape(this.formatNumber(snapshotByDate.get(date) ?? 0))}">
+        <div class="coin-input-shell">
+          <i class="fi fi-rr-coin" aria-hidden="true"></i>
+          <input
+            id="fans-${this.escape(date)}"
+            inputmode="numeric"
+            data-number-input
+            value="${this.escape(this.formatNumber(snapshotByDate.get(date) ?? 0))}">
+        </div>
       </label>
     `).join('');
 
     return `
-      <div class="crud-form">
+      <div class="crud-form player-form">
         <div class="crud-grid player-grid">
           <label>
             <span>Name</span>
@@ -189,14 +218,25 @@ export class CrudAlertService {
           </label>
           <label>
             <span>Debt</span>
-            <input id="player-debt" inputmode="numeric" data-number-input value="${this.escape(this.formatNumber(member?.debt ?? 0))}">
+            <div class="coin-input-shell">
+              <i class="fi fi-rr-coin" aria-hidden="true"></i>
+              <input id="player-debt" inputmode="numeric" data-number-input value="${this.escape(this.formatNumber(member?.debt ?? 0))}">
+            </div>
           </label>
         </div>
         <label>
           <span>Note</span>
-          <textarea id="player-note" rows="2">${this.escape(member?.note ?? '')}</textarea>
+          <textarea id="player-note" rows="3" placeholder="Enter player notes here...">${this.escape(member?.note ?? '')}</textarea>
         </label>
-        <div class="crud-grid points-grid">${pointInputs}</div>
+        <section class="player-points-section">
+          <div class="player-section-title">
+            <i class="fi fi-rr-calendar" aria-hidden="true"></i>
+            <strong>Scheduled Dates</strong>
+          </div>
+          <div class="player-points-panel">
+            <div class="crud-grid points-grid">${pointInputs}</div>
+          </div>
+        </section>
       </div>
     `;
   }

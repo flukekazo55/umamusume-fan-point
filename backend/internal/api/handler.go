@@ -3,7 +3,9 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -46,6 +48,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/months", h.months)
 	mux.HandleFunc("POST /api/months", h.createMonth)
 	mux.HandleFunc("GET /api/months/{id}", h.month)
+	mux.HandleFunc("GET /api/months/{id}/export", h.exportMonth)
 	mux.HandleFunc("PUT /api/months/{id}", h.updateMonth)
 	mux.HandleFunc("DELETE /api/months/{id}", h.deleteMonth)
 	mux.HandleFunc("GET /api/months/{monthID}/players", h.listPlayers)
@@ -86,6 +89,39 @@ func (h *Handler) month(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, http.StatusOK, month)
 			return
 		}
+	}
+
+	writeError(w, http.StatusNotFound, errors.New("month not found"))
+}
+
+func (h *Handler) exportMonth(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if id == "" {
+		writeError(w, http.StatusBadRequest, errors.New("month id is required"))
+		return
+	}
+
+	workbook, err := h.load()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	for _, month := range workbook.Months {
+		if month.ID != id {
+			continue
+		}
+		data, err := excel.ExportMonthWorkbook(month)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, err)
+			return
+		}
+		fileName := strings.ReplaceAll(excel.ExportFileName(month), `"`, "")
+		w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
+		return
 	}
 
 	writeError(w, http.StatusNotFound, errors.New("month not found"))
