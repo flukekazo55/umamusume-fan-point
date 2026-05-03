@@ -2,7 +2,31 @@
 
 When deploying the Go backend to production, use one of these approaches:
 
-## Using Railway (Recommended)
+## Using Vercel
+
+The backend can run on Vercel using the Go framework preset.
+
+Vercel project settings:
+- **Root Directory**: `backend`
+- **Framework Preset**: `Go`
+- **Build Command**: leave empty unless Vercel asks for one
+- **Output Directory**: leave empty
+
+Environment variables:
+```text
+MONGO_DATABASE=umamusume_fan_point
+MONGO_URI=mongodb+srv://Vercel-Admin-atlas-orange-envelope:<password>@atlas-orange-envelope.y78zmec.mongodb.net/?retryWrites=true&w=majority
+```
+
+Do not set `ADDR` on Vercel. Vercel provides `PORT`, and the server now uses it
+automatically. Use `ADDR=:8080` only for local runs or non-Vercel hosts.
+
+After deployment, test:
+```bash
+curl https://your-backend.vercel.app/api/health
+```
+
+## Using Railway
 
 Railway auto-detects Go projects and handles deployment automatically.
 

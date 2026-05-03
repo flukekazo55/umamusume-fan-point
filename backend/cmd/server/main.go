@@ -15,7 +15,7 @@ import (
 
 func main() {
 	dataFile := getenv("DATA_FILE", filepath.Join("..", "source.xlsx"))
-	addr := getenv("ADDR", ":8080")
+	addr := listenAddr()
 	staticDir := os.Getenv("STATIC_DIR")
 	mongoURI := os.Getenv("MONGO_URI")
 	mongoDatabase := getenv("MONGO_DATABASE", "umamusume_fan_point")
@@ -64,6 +64,13 @@ func getenv(key string, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+func listenAddr() string {
+	if port := os.Getenv("PORT"); port != "" {
+		return ":" + port
+	}
+	return getenv("ADDR", ":8080")
 }
 
 func withCORS(next http.Handler) http.Handler {
