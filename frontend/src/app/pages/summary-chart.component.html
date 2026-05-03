@@ -1,0 +1,31 @@
+<div class="chart-container">
+  <div class="chart-controls">
+    <div class="chart-buttons">
+      <button
+        type="button"
+        class="chart-btn"
+        [class.active]="chartType === 'gain'"
+        (click)="changeChartType('gain')">
+        <span>Total Gain</span>
+      </button>
+      <button
+        type="button"
+        class="chart-btn"
+        [class.active]="chartType === 'current'"
+        (click)="changeChartType('current')">
+        <span>Current Fans</span>
+      </button>
+      <button
+        type="button"
+        class="chart-btn"
+        [class.active]="chartType === 'average'"
+        (click)="changeChartType('average')">
+        <span>Avg Gain/Week</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <canvas #chartCanvas></canvas>
+  </div>
+</div>

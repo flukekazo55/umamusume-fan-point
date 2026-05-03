@@ -1,0 +1,236 @@
+<main class="app-shell">
+  <section class="topbar">
+    <div class="brand">
+      <img src="assets/app-logo.png" alt="" class="brand-mark">
+      <div>
+        <p class="eyebrow">Uma Musume Club</p>
+        <h1>Fan Point Tracker</h1>
+      </div>
+    </div>
+    <div class="sync-chip" *ngIf="workbook">
+      {{ workbook.generatedAt | date: 'HH:mm' }}
+    </div>
+  </section>
+
+  <section *ngIf="isLoading" class="state-panel">Loading fan points...</section>
+  <section *ngIf="errorMessage" class="state-panel error">{{ errorMessage }}</section>
+
+  <ng-container *ngIf="!isLoading && !errorMessage && workbook && selectedMonth">
+    <section class="month-selector">
+      <label for="month-autocomplete">Month</label>
+      <div class="month-row">
+        <div class="month-autocomplete">
+          <input
+            id="month-autocomplete"
+            type="text"
+            name="monthSearch"
+            [(ngModel)]="monthSearchTerm"
+            (focus)="openMonthAutocomplete()"
+            (input)="openMonthAutocomplete()"
+            (blur)="closeMonthAutocomplete()"
+            autocomplete="off"
+            aria-label="Month selector">
+          <div class="month-options" *ngIf="isMonthAutocompleteOpen">
+            <button
+              type="button"
+              class="month-option"
+              *ngFor="let month of filteredMonths(); trackBy: trackByMonth"
+              [class.active]="month.id === selectedMonth.id"
+              (mousedown)="selectMonth(month)">
+              <span>
+                <strong>{{ month.label }}</strong>
+                <small>{{ month.id }}</small>
+              </span>
+              <em>{{ month.stats.trackedMembers }} members</em>
+            </button>
+            <div class="month-option empty" *ngIf="filteredMonths().length === 0">
+              No months found
+            </div>
+          </div>
+        </div>
+        <button type="button" class="icon-action" title="Edit month" aria-label="Edit month" (click)="openEditMonth()" [disabled]="isSavingMonth">
+          <i class="fi fi-rr-pencil"></i>
+        </button>
+        <button type="button" class="icon-action danger-action" title="Delete month" aria-label="Delete month" (click)="deleteSelectedMonth()" [disabled]="isSavingMonth">
+          <i class="fi fi-rr-trash"></i>
+        </button>
+        <button type="button" class="icon-action primary-icon-action" title="Add month" aria-label="Add month" (click)="openCreateMonth()" [disabled]="isSavingMonth">
+          <i class="fi fi-rr-plus"></i>
+        </button>
+      </div>
+    </section>
+
+    <section class="view-mode-tabs">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="viewMode === 'dashboard'"
+        (click)="switchView('dashboard')">
+        <i class="fi fi-rr-list"></i>
+        <span>Leaderboard</span>
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="viewMode === 'chart'"
+        (click)="switchView('chart')">
+        <i class="fi fi-rr-chart-bar"></i>
+        <span>Summary</span>
+      </button>
+    </section>
+
+    <section class="hero-panel">
+      <div>
+        <p class="eyebrow">{{ selectedMonth.startDate | date: 'd MMM' }} - {{ selectedMonth.endDate | date: 'd MMM y' }}</p>
+        <h2>{{ selectedMonth.label }}</h2>
+      </div>
+      <div class="hero-grid">
+        <article>
+          <span>Leader</span>
+          <strong>{{ selectedMonth.stats.leader?.name || '-' }}</strong>
+          <small>{{ selectedMonth.stats.leader?.value | compactNumber }}</small>
+        </article>
+        <article>
+          <span>Total Gain</span>
+          <strong>{{ selectedMonth.stats.totalGain | compactNumber }}</strong>
+          <small>{{ selectedMonth.stats.activeMembers }} active</small>
+        </article>
+        <article>
+          <span>Debt</span>
+          <strong>{{ selectedMonth.stats.totalDebt | compactNumber }}</strong>
+          <small>negative = behind</small>
+        </article>
+      </div>
+    </section>
+
+    <ng-container *ngIf="viewMode === 'dashboard'">
+      <section class="controls">
+        <div class="member-autocomplete">
+          <input
+            type="search"
+            name="search"
+            placeholder="Search member"
+            [(ngModel)]="searchTerm"
+            (focus)="openMemberAutocomplete()"
+            (input)="openMemberAutocomplete()"
+            (blur)="closeMemberAutocomplete()"
+            autocomplete="off"
+            aria-label="Search member">
+          <div class="member-options" *ngIf="isMemberAutocompleteOpen && searchTerm.trim()">
+            <button
+            type="button"
+            class="member-option"
+            *ngFor="let member of filteredMembers(); trackBy: trackByMember"
+            [class.active]="selectedMember?.name === member.name"
+            (mousedown)="chooseMember(member)">
+            <span>
+              <strong>{{ member.name }}</strong>
+              <small>{{ member.note || 'Rank #' + member.rank }}</small>
+            </span>
+            <em>{{ member.currentFans | compactNumber }}</em>
+          </button>
+          <div class="member-option empty" *ngIf="filteredMembers().length === 0">
+            No players found
+          </div>
+        </div>
+      </div>
+      <div class="segment" aria-label="Sort mode">
+        <button
+          type="button"
+          *ngFor="let mode of sortModes"
+          [class.active]="sortMode === mode.value"
+          (click)="sortMode = mode.value">
+          {{ mode.label }}
+        </button>
+      </div>
+      <button type="button" class="icon-action primary-icon-action" title="Add player" aria-label="Add player" (click)="openCreatePlayer()">
+        <i class="fi fi-rr-plus"></i>
+      </button>
+    </section>
+
+    <section class="content-grid">
+      <div class="member-list" aria-label="Member leaderboard">
+        <button
+          type="button"
+          class="member-card"
+          *ngFor="let member of filteredMembers(); trackBy: trackByMember"
+          [class.selected]="selectedMember?.name === member.name"
+          (click)="selectMember(member)">
+          <span class="rank">#{{ member.rank }}</span>
+          <span class="member-main">
+            <strong>
+              {{ member.name }}
+              <small class="name-note" *ngIf="member.note">{{ member.note }}</small>
+            </strong>
+            <small class="member-summary">
+              <span>{{ member.currentFans | compactNumber }} fans</span>
+              <span [class.negative]="member.totalGain < 0">Gain {{ member.totalGain | compactNumber }}</span>
+              <span *ngIf="member.debt !== 0" class="debt">Debt {{ member.debt | compactNumber }}</span>
+            </small>
+          </span>
+          <span class="member-side">
+            <strong [class.negative]="member.totalGain < 0">+{{ member.totalGain | compactNumber }}</strong>
+            <small *ngIf="member.debt !== 0" class="debt">{{ member.debt | compactNumber }}</small>
+          </span>
+        </button>
+      </div>
+
+      <aside class="detail-panel" *ngIf="selectedMember">
+        <div class="detail-header">
+          <div>
+            <p class="eyebrow">Rank #{{ selectedMember.rank }}</p>
+            <h3>{{ selectedMember.name }}</h3>
+          </div>
+          <div class="detail-actions">
+            <span class="trend" [class.up]="selectedMember.trend === 'up'" [class.down]="selectedMember.trend === 'down'">
+              {{ selectedMember.trend }}
+            </span>
+            <button type="button" class="icon-action" title="Edit player" aria-label="Edit player" (click)="openEditPlayer()" [disabled]="isSavingPlayer">
+              <i class="fi fi-rr-pencil"></i>
+            </button>
+            <button type="button" class="icon-action danger-action" title="Delete player" aria-label="Delete player" (click)="deleteSelectedPlayer()" [disabled]="isSavingPlayer">
+              <i class="fi fi-rr-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="detail-stats">
+          <article>
+            <span>Current</span>
+            <strong>{{ selectedMember.currentFans | compactNumber }}</strong>
+          </article>
+          <article>
+            <span>Avg Gain</span>
+            <strong>{{ selectedMember.averageGain | compactNumber }}</strong>
+          </article>
+          <article>
+            <span>Debt</span>
+            <strong>{{ selectedMember.debt | compactNumber }}</strong>
+          </article>
+        </div>
+
+        <div class="note" *ngIf="selectedMember.note">
+          {{ selectedMember.note }}
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-row" *ngFor="let week of selectedMember.weeklyGains">
+            <span>W{{ week.index }}</span>
+            <div class="bar-track">
+              <div class="bar" [style.width]="weekBarWidth(week.gain, selectedMember)" [class.negative]="week.gain < 0"></div>
+            </div>
+            <strong>{{ week.gain | compactNumber }}</strong>
+          </div>
+          <div class="empty-weeks" *ngIf="selectedMember.weeklyGains.length === 0">
+            Waiting for next fan-point snapshot.
+          </div>
+        </div>
+      </aside>
+    </section>
+    </ng-container>
+
+    <ng-container *ngIf="viewMode === 'chart'">
+      <app-summary-chart [selectedMonth]="selectedMonth"></app-summary-chart>
+    </ng-container>
+  </ng-container>
+</main>

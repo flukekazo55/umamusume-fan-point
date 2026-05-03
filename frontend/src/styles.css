@@ -1,0 +1,211 @@
+@import 'sweetalert2/dist/sweetalert2.min.css';
+@import 'flatpickr/dist/flatpickr.min.css';
+
+@font-face {
+  font-family: "uicons-regular-rounded";
+  src: url("../node_modules/@flaticon/flaticon-uicons/css/uicons-regular-rounded-J3WOUERV.woff2") format("woff2");
+  font-display: swap;
+}
+
+.fi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "uicons-regular-rounded";
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  text-transform: none;
+}
+
+.fi-rr-pencil::before {
+  content: "\fa29";
+}
+
+.fi-rr-plus::before {
+  content: "\faac";
+}
+
+.fi-rr-trash::before {
+  content: "\fe17";
+}
+
+:root {
+  color-scheme: light;
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --surface-strong: #111827;
+  --text: #172033;
+  --muted: #6b7280;
+  --line: #d9dee8;
+  --accent: #e11d48;
+  --accent-soft: #ffe4e9;
+  --gold: #d97706;
+  --green: #047857;
+  --danger: #b91c1c;
+  --blue: #2563eb;
+  --shadow: 0 16px 40px rgba(17, 24, 39, 0.08);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    linear-gradient(135deg, rgba(225, 29, 72, 0.08), transparent 34rem),
+    linear-gradient(315deg, rgba(37, 99, 235, 0.08), transparent 30rem),
+    var(--bg);
+  color: var(--text);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.crud-swal {
+  color: var(--text);
+}
+
+.crud-form {
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+
+.crud-form label {
+  display: grid;
+  gap: 5px;
+}
+
+.crud-form label span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.crud-form input,
+.crud-form select,
+.crud-form textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  padding: 0 12px;
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+
+.crud-form textarea {
+  min-height: 84px;
+  padding-block: 10px;
+  resize: vertical;
+}
+
+.crud-form input:focus,
+.crud-form select:focus,
+.crud-form textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.14);
+}
+
+.crud-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.crud-date-section {
+  display: grid;
+  gap: 8px;
+}
+
+.crud-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.crud-section-header span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.crud-date-list {
+  display: grid;
+  gap: 8px;
+}
+
+.crud-date-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  gap: 8px;
+}
+
+.crud-add-button,
+.crud-remove-button {
+  display: inline-grid;
+  width: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  place-items: center;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 850;
+}
+
+.crud-add-button {
+  border: 0;
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 0 12px;
+}
+
+.crud-remove-button {
+  border: 1px solid #fecaca;
+  background: white;
+  color: var(--danger);
+}
+
+.crud-add-button .fi,
+.crud-remove-button .fi {
+  display: inline-flex;
+  height: 18px;
+  align-items: center;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.points-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 680px) {
+  .month-grid {
+    grid-template-columns: 1fr 1.4fr 150px 150px;
+  }
+
+  .player-grid {
+    grid-template-columns: 1fr 180px;
+  }
+
+  .points-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

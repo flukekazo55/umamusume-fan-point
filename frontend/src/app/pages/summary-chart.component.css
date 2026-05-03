@@ -1,0 +1,79 @@
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.chart-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.chart-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chart-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.chart-btn:hover {
+  border-color: #9ca3af;
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.chart-btn.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.chart-wrapper {
+  position: relative;
+  min-height: 400px;
+  width: 100%;
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+canvas {
+  max-height: 500px;
+}
+
+@media (max-width: 768px) {
+  .chart-container {
+    padding: 0.75rem;
+  }
+
+  .chart-wrapper {
+    min-height: 300px;
+    padding: 0.75rem;
+  }
+
+  .chart-buttons {
+    gap: 0.25rem;
+  }
+
+  .chart-btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+}

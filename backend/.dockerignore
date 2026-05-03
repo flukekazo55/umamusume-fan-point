@@ -1,0 +1,6 @@
+*.log
+.git
+.gitignore
+.env
+.env.local
+README.md
