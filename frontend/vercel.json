@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/dist/fan-point/browser",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/fan-point/browser",
   "env": {
     "NG_BUILD_MODE": "production"
   },
